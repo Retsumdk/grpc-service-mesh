@@ -1,17 +1,60 @@
 {
   "name": "grpc-service-mesh",
-  "description": "grpc service mesh implementation",
+  "description": "A zero-dependency gRPC service mesh for unary calls: real HTTP/2 wire protocol, a protobuf codec, weighted round-robin load balancing, deadline-aware retries, a circuit breaker, and gRPC health checks",
   "version": "1.0.0",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "gsm": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "test": "bun test",
-    "build": "tsc"
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "demo": "node dist/cli.js demo",
+    "serve": "node dist/cli.js serve",
+    "call": "node dist/cli.js call",
+    "prepare": "tsc -p tsconfig.json"
   },
-  "dependencies": {
-    "commander": "^11.1.0"
+  "keywords": [
+    "grpc",
+    "service-mesh",
+    "load-balancing",
+    "circuit-breaker",
+    "health-check",
+    "retry",
+    "http2",
+    "protobuf",
+    "typescript",
+    "zero-dependency"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Retsumdk/grpc-service-mesh.git"
   },
+  "bugs": {
+    "url": "https://github.com/Retsumdk/grpc-service-mesh/issues"
+  },
+  "homepage": "https://github.com/Retsumdk/grpc-service-mesh#readme",
   "devDependencies": {
-    "bun-types": "^1.0.0",
+    "@types/node": "^22.10.0",
+    "bun-types": "^1.1.0",
     "typescript": "^5.3.0"
   }
 }

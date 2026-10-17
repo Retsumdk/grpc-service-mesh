@@ -1,0 +1,18 @@
+{
+  "endpoints": [
+    { "name": "alpha", "address": "127.0.0.1:5071" },
+    { "name": "beta", "address": "127.0.0.1:5072", "weight": 1 }
+  ],
+  "policy": "round_robin",
+  "retry": {
+    "maxAttempts": 3,
+    "baseBackoffMs": 50,
+    "backoffMultiplier": 2,
+    "maxBackoffMs": 2000,
+    "retryableStatuses": [14, 1],
+    "deadlineGuardFraction": 0.8
+  },
+  "health": { "intervalMs": 0, "timeoutMs": 500, "failuresToUnhealthy": 2, "successesToHealthy": 1, "serviceName": "" },
+  "defaultDeadlineMs": 10000,
+  "failFast": false
+}

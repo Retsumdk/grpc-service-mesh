@@ -1,51 +1,86 @@
-#!/usr/bin/env bun
 /**
- * grpc-service-mesh - grpc service mesh implementation
- * Built by Retsumdk
+ * grpc-service-mesh — a zero-dependency gRPC service mesh for unary calls.
+ *
+ * Real HTTP/2 gRPC wire protocol (no gRPC libraries), a wire-format protobuf
+ * codec, weighted round-robin / pick-first load balancing, deadline-aware
+ * retries with exponential backoff, a passive circuit breaker with half-open
+ * recovery, and active gRPC health checking.
  */
+export type {
+  CallContext,
+  CallOptions,
+  EndpointHealth,
+  EndpointSpec,
+  EndpointState,
+  EndpointStats,
+  HealthCheckPolicy,
+  LoadBalancingPolicy,
+  MeshEvent,
+  MeshListener,
+  MeshOptions,
+  RetryPolicy,
+  UnaryHandler,
+} from "./types.js";
 
-import { Command } from "commander";
-import { existsSync, readFileSync } from "fs";
-import { join } from "path";
+export {
+  GrpcStatus,
+  GrpcError,
+  MeshError,
+  grpcFailure,
+  statusForTransportError,
+  statusName,
+} from "./errors.js";
+export type { MeshErrorCode } from "./errors.js";
 
-interface Config {
-  apiKey?: string;
-  baseUrl: string;
-  timeout: number;
-  retries: number;
-}
+export {
+  decodeMessage,
+  decodeVarint,
+  encodeTag,
+  encodeVarint,
+  fieldBool,
+  fieldBytes,
+  fieldDouble,
+  fieldFixed32,
+  fieldInt32,
+  fieldInt64,
+  fieldString,
+  fieldVarint,
+  findField,
+  writer,
+} from "./protobuf.js";
+export type { DecodedField, ProtobufWriter } from "./protobuf.js";
 
-const DEFAULTS: Config = {
-  baseUrl: "https://api.example.com",
-  timeout: 30000,
-  retries: 3,
-};
+export {
+  GRPC_CONTENT_TYPE,
+  HEALTH_CHECK_PATH,
+  HEALTH_NOT_SERVING,
+  HEALTH_SERVING,
+  frameMessage,
+  normalizeAuthority,
+  startGrpcServer,
+  unaryCall,
+  unframeMessages,
+} from "./grpc.js";
+export type {
+  GrpcServerOptions,
+  RunningGrpcServer,
+  UnaryCallOptions,
+  UnaryResponse,
+} from "./grpc.js";
 
-function loadConfig(): Config {
-  const cfgPath = join(process.cwd(), "config.json");
-  if (existsSync(cfgPath)) {
-    try {
-      return { ...DEFAULTS, ...JSON.parse(readFileSync(cfgPath, "utf-8")) };
-    } catch { /* ignore */ }
-  }
-  return { ...DEFAULTS };
-}
+export { Balancer, DEFAULT_BALANCER_OPTIONS } from "./balancer.js";
+export type { BalancerOptions, BalancerEndpointSnapshot } from "./balancer.js";
 
-async function main(cfg: Config) {
-  console.log(`[${name}] Connected to ${cfg.baseUrl}`);
-  console.log(`[${name}] Timeout: ${cfg.timeout}ms | Retries: ${cfg.retries}`);
-  // TODO: implement your logic here
-  console.log(`[${name}] Done.`);
-}
+export { HealthChecker, DEFAULT_HEALTH_POLICY, grpcHealthProbe } from "./health.js";
+export type { HealthCheckerOptions, HealthProbe } from "./health.js";
 
-const program = new Command();
-program.name("grpc-service-mesh").description("grpc service mesh implementation").version("1.0.0")
-  .option("-c, --config <path>", "Config file path", "config.json")
-  .option("-v, --verbose", "Verbose mode")
-  .action(async (opts) => {
-    const cfg = loadConfig();
-    if (opts.verbose) console.log("Verbose mode on");
-    try { await main(cfg); }
-    catch (e) { console.error(`Error: ${e}`); process.exit(1); }
-  });
-program.parse(process.argv);
+export { DEFAULT_RETRY_POLICY, MeshClient } from "./mesh.js";
+export type { EndpointSnapshot, MeshClientOptions } from "./mesh.js";
+
+export {
+  startMeshServer,
+  echoHandler,
+  failingHandler,
+  ECHO_METHOD,
+} from "./server.js";
+export type { MeshServerOptions, RunningMeshServer } from "./server.js";

@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install
+      - run: bun test
+      - run: bunx tsc -p tsconfig.test.json --noEmit
+      - run: bunx tsc -p tsconfig.json
+      - name: Node smoke (demo determinism + serve/call round-trip)
+        run: |
+          node dist/cli.js demo > /tmp/demo-a.txt
+          node dist/cli.js demo > /tmp/demo-b.txt
+          diff /tmp/demo-a.txt /tmp/demo-b.txt
+          grep -q "endpoint-ejected endpoint=beta" /tmp/demo-a.txt
+          grep -q "alpha  calls= 6 ok= 6" /tmp/demo-a.txt
+          node dist/cli.js --help | grep -q "gsm —"
+          node dist/cli.js serve --port 5099 &
+          sleep 2
+          node dist/cli.js call --address 127.0.0.1:5099 --method /mesh.demo.Echo/Echo --message ci | grep -q "echo: ci"
+          kill %1
+      - name: Package installs from the built tree
+        run: |
+          npm pack --pack-destination /tmp
+          cd /tmp && npm init -y >/dev/null
+          npm install /tmp/grpc-service-mesh-1.0.0.tgz
+          node -e "import('grpc-service-mesh').then(m => { if (typeof m.MeshClient !== 'function') process.exit(1); console.log('install ok'); })"
